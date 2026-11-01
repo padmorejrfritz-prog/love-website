@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For My Love</title>
+  <style>
+    :root {
+      --bg1: #fff7fb;
+      --bg2: #fce8f3;
+      --pink: #ff7fb4;
+      --deep-pink: #d85d94;
+      --rose: #ffe9f3;
+      --text: #472b42;
+      --muted: #7a5970;
+      --card: rgba(255, 255, 255, 0.74);
+      --shadow: rgba(203, 84, 140, 0.18);
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(135deg, rgba(255, 240, 246, 0.65), rgba(255, 228, 239, 0.8)),
+        url("https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif") center/cover no-repeat fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .ui-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(46, 18, 29, 0.38);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .popup-stage {
+      position: relative;
+      width: min(440px, 100%);
+      height: min(760px, 92vh);
+    }
+
+    .popup-screen {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.55s ease;
+    }
+
+    .popup-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    .screen-card {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,240,247,0.68));
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px var(--shadow);
+      padding: 22px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .badge {
+      display: inline-block;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 92, 168, 0.12);
+      color: var(--deep-pink);
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .screen-hero {
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .screen-hero .heart {
+      font-size: 2.5rem;
+      display: inline-block;
+      animation: pulse 1.5s ease-in-out infinite;
+      margin-bottom: 6px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.14); }
+    }
+
+    .screen-hero h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      line-height: 1.1;
+      color: var(--deep-pink);
+    }
+
+    .screen-hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.98rem;
+    }
+
+    .screen-image {
+      width: 100%;
+      height: 220px;
+      border-radius: 22px;
+      overflow: hidden;
+      margin: 18px 0;
+      box-shadow: 0 12px 22px rgba(214, 106, 158, 0.12);
+    }
+
+    .screen-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .screen-gif {
+      width: 100%;
+      height: 170px;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 18px 0 12px;
+      box-shadow: 0 12px 24px rgba(214, 106, 158, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .screen-gif img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.05) contrast(1.02);
+    }
+
+    .message-box {
+      background: rgba(255,255,255,0.42);
+      border-left: 4px solid var(--pink);
+      border-radius: 16px;
+      padding: 14px 14px;
+      line-height: 1.7;
+      font-size: 0.98rem;
+      color: var(--text);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mini-grid img {
+      width: 100%;
+      height: 86px;
+      object-fit: cover;
+      border-radius: 14px;
+      display: block;
+      box-shadow: 0 8px 18px rgba(214, 106, 158, 0.08);
+    }
+
+    .dot-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 18px 0 12px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(217, 61, 130, 0.26);
+      transition: all 0.25s ease;
+    }
+
+    .dot.active {
+      background: var(--deep-pink);
+      transform: scale(1.18);
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .nav-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.primary {
+      background: linear-gradient(135deg, var(--pink), var(--deep-pink));
+      color: var(--white);
+      flex: 1;
+      box-shadow: 0 14px 26px rgba(217, 61, 130, 0.2);
+    }
+
+    .nav-btn.secondary {
+      background: rgba(255,255,255,0.6);
+      color: var(--deep-pink);
+      border: 1px solid rgba(217, 61, 130, 0.12);
+    }
+
+    @media (max-width: 500px) {
+      .screen-card {
+        padding: 20px 16px 16px;
+      }
+
+      .screen-image {
+        height: 190px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ui-overlay" id="surpriseUI">
+    <div class="popup-stage">
+      <section class="popup-screen active" data-index="0">
+        <div class="screen-card">
+          <div>
+            <span class="badge">Surprise</span>
+            <div class="screen-hero">
+              <div class="heart">❤</div>
+              <h2>For You</h2>
+              <p>A little pop-up just for the one who makes my heart feel at peace.</p>
+            </div>
+            <div class="screen-gif">
+              <img src="https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=900&q=80" alt="Romantic flower" />
+            </div>
+            <div class="message-box">
+              From the very first hey, my heart has never been the same. You are the sweetest part of my story.
+            </div>
+          </div>
+
+          <div>
+            <div class="dot-row">
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="nav-row">
+              <button class="nav-btn secondary" type="button" data-role="back" disabled>Back</button>
+              <button class="nav-btn primary" type="button" data-role="next">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="popup-screen" data-index="1">
+        <div class="screen-card">
+          <div>
+            <span class="badge">My message</span>
+            <div class="screen-hero">
+              <div class="heart">💌</div>
+              <h2>My Love</h2>
+            </div>
+            <div class="screen-gif">
+              <img src="https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=900&q=80" alt="Romantic flowers" />
+            </div>
+            <div class="message-box">
+              Every time I think of you, my heart smiles. You are my calm, my joy, and the kind of love I never want to lose.
+            </div>
+          </div>
+
+          <div>
+            <div class="dot-row">
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="nav-row">
+              <button class="nav-btn secondary" type="button" data-role="back">Back</button>
+              <button class="nav-btn primary" type="button" data-role="next">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="popup-screen" data-index="2">
+        <div class="screen-card">
+          <div>
+            <span class="badge">Safe place</span>
+            <div class="screen-hero">
+              <div class="heart">🌷</div>
+              <h2>Home</h2>
+            </div>
+            <div class="screen-gif">
+              <img src="https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=900&q=80" alt="Blooming flowers" />
+            </div>
+            <div class="message-box">
+              You are my peace in the middle of chaos. With you, even the hardest days feel softer and every dream feels possible.
+            </div>
+          </div>
+
+          <div>
+            <div class="dot-row">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="nav-row">
+              <button class="nav-btn secondary" type="button" data-role="back">Back</button>
+              <button class="nav-btn primary" type="button" data-role="next">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="popup-screen" data-index="3">
+        <div class="screen-card">
+          <div>
+            <span class="badge">Memories</span>
+            <div class="screen-hero">
+              <div class="heart">✨</div>
+              <h2>Us</h2>
+            </div>
+            <div class="screen-gif">
+              <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80" alt="Flower petals" />
+            </div>
+            <div class="message-box">
+              I love the way you make ordinary moments feel magical. You are the favorite part of every memory I carry with me.
+            </div>
+          </div>
+
+          <div>
+            <div class="dot-row">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="nav-row">
+              <button class="nav-btn secondary" type="button" data-role="back">Back</button>
+              <button class="nav-btn primary" type="button" data-role="next">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="popup-screen" data-index="4">
+        <div class="screen-card">
+          <div>
+            <span class="badge">Forever</span>
+            <div class="screen-hero">
+              <div class="heart">💖</div>
+              <h2>Always</h2>
+            </div>
+            <div class="screen-gif">
+              <img src="https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=900&q=80" alt="Romantic flower scene" />
+            </div>
+            <div class="message-box">
+              I want forever to feel like this: us, laughing, loving, and choosing each other with all of our hearts.
+            </div>
+          </div>
+
+          <div>
+            <div class="dot-row">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="nav-row">
+              <button class="nav-btn secondary" type="button" data-role="back">Back</button>
+              <button class="nav-btn primary" type="button" data-role="next">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="popup-screen" data-index="5">
+        <div class="screen-card">
+          <div>
+            <span class="badge">Final page</span>
+            <div class="screen-hero">
+              <div class="heart">💞</div>
+              <h2>Always Yours</h2>
+            </div>
+            <div class="screen-gif">
+              <img src="https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=900&q=80" alt="Final flower scene" />
+            </div>
+            <div class="message-box">
+              You are my home, my peace, and my favorite person in the whole world. I love you more than words can say, and I will always choose you.I love you Miss Evelyn Greatness Geeton❤️🩷💕
+            </div>
+          </div>
+
+          <div>
+            <div class="dot-row">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+            </div>
+            <div class="nav-row">
+              <button class="nav-btn secondary" type="button" data-role="back">Back</button>
+              <button class="nav-btn primary" type="button" data-role="done">Finish</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const screens = Array.from(document.querySelectorAll('.popup-screen'));
+    const dots = Array.from(document.querySelectorAll('.dot'));
+    let currentIndex = 0;
+
+    function updateUI() {
+      screens.forEach((screen, index) => {
+        screen.classList.toggle('active', index === currentIndex);
+      });
+
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    document.querySelectorAll('[data-role="next"]').forEach(button => {
+      button.addEventListener('click', () => {
+        currentIndex = Math.min(currentIndex + 1, screens.length - 1);
+        updateUI();
+      });
+    });
+
+    document.querySelectorAll('[data-role="back"]').forEach(button => {
+      button.addEventListener('click', () => {
+        currentIndex = Math.max(currentIndex - 1, 0);
+        updateUI();
+      });
+    });
+
+    document.querySelectorAll('[data-role="done"]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.getElementById('surpriseUI').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
